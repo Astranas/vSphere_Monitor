@@ -1,6 +1,6 @@
 ﻿body {
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding-top: 0px;
+    padding-bottom: 0px;
 }
 
 /* Set padding to keep content from hitting the edges */
@@ -21,4 +21,28 @@ input,
 select,
 textarea {
     max-width: 280px;
+}
+
+.rectangleGreen {
+    height: 48px;
+    background-color: green;
+}
+
+.rectangleOrange {
+    height: 48px;
+    width: 50px;
+    background-color: orangered;
+}
+
+.rectangleRed {
+    height: 48px;
+    width: 70px;
+    background-color: red;
+}
+
+.rectangleEmpty {
+    height: 50px;
+    width: 300px;
+    border-style: solid;
+    border-width: thin;
 }
