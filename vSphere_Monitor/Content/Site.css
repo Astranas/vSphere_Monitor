@@ -46,3 +46,13 @@ textarea {
     border-style: solid;
     border-width: thin;
 }
+
+.custom-jumbo {
+    padding-left: 3rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    padding-right: 3rem;
+
+    background-color: #e9ecef;
+    border-radius:0.3rem;
+}

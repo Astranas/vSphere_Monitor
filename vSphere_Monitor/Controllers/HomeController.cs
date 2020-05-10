@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
@@ -24,80 +25,97 @@ namespace vSphere_Monitor.Controllers
             return View();
         }
 
-        public JsonResult RunPowershell(string id)
+        public void RunPowershell(string args)
         {
-            var host = GetHostInfo();
-            return Json(host, JsonRequestBehavior.AllowGet);
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.FileName = @"powershell.exe";
+            startInfo.Arguments = args;
+            startInfo.RedirectStandardOutput = true;
+            startInfo.RedirectStandardError = true;
+            startInfo.UseShellExecute = false;
+            startInfo.CreateNoWindow = true;
+            Process process = new Process();
+            process.StartInfo = startInfo;
+            process.Start();
 
-            //string scriptfilepath = "";
-
-            //if (scriptfilepath.Length <= 0)
-            //{
-            //    return Json(result, JsonRequestBehavior.AllowGet);
-
-            //}
-            //else
-            //{
-            //    PowerShell powershell = PowerShell.Create();
-            //    //RunspaceConfiguration runspaceConfiguration = RunspaceConfiguration.Create();
-            //    //Runspace runspace = RunspaceFactory.CreateRunspace(runspaceConfiguration)
-            //    using (Runspace runspace = RunspaceFactory.CreateRunspace())
-            //    {
-            //        runspace.Open();
-            //        //RunspaceInvoke scriptInvoker = new RunspaceInvoke(runspace);
-            //        //scriptInvoker.Invoke("Set-ExecutionPolicy Unrestricted");
-            //        powershell.Runspace = runspace;
-            //        //powershell.Commands.AddScript("Add-PsSnapin Microsoft.SharePoint.PowerShell");
-            //        System.IO.StreamReader sr = new System.IO.StreamReader(scriptfilepath);
-            //        powershell.AddScript(sr.ReadToEnd());
-            //        //powershell.AddCommand("Out-String");
-            //        var results = powershell.Invoke();
-            //        if (powershell.Streams.Error.Count > 0)
-            //        {
-            //            // error records were written to the error stream.
-            //            // do something with the items found.
-            //        }
-            //    }
-            //    return Json("temp", JsonRequestBehavior.AllowGet);
-            //}
-
+            StreamReader myStreamReader = process.StandardError;
+            // Read the standard error of net.exe and write it on to console.
+            Debug.WriteLine(myStreamReader.ReadLine());
         }
         
-        public List<Host> GetHostInfo()
+        public JsonResult GetHostInfo(string hostId)
         {
-            //string file = System.IO.File.ReadAllText(@"C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\jsonResult.json");
-            //var result = JsonConvert.DeserializeObject(file);
-
-            var vmlist = new List<VM>
+            if (hostId != "" && hostId != null)
             {
-                new VM
+                string vmhostname = "";
+                string vmhostfile = "";
+                switch (hostId)
                 {
-                    Name = "TinyCore1",
-                    Cpu_number = 1,
-                    Memory = 256
-                },
-                new VM
-                {
-                    Name = "centOS7",
-                    Cpu_number = 1,
-                    Memory = 1
+                    case "1":
+                        vmhostname = "192.168.1.168";
+                        vmhostfile = "192-168-1-168";
+                        break;
+                    case "2":
+                        vmhostname = "192.168.1.169";
+                        vmhostfile = "192-168-1-169";
+                        break;
+                    case "3":
+                        vmhostname = "192.168.1.174";
+                        vmhostfile = "192-168-1-174";
+                        break;
+                    case "4":
+                        vmhostname = "192.168.1.175";
+                        vmhostfile = "192-168-1-175";
+                        break;
                 }
-            };
 
-            var hostList = new List<Host>
+                string path = @"C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\" + vmhostfile + ".json";
+
+                if (compareDates(path))
+                {
+                    RunPowershell(@"-executionpolicy unrestricted -file C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\vApp.ps1 -vmhost " + vmhostname);
+                }
+
+                string file = System.IO.File.ReadAllText(@"C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\" + vmhostfile + ".json");
+
+                Host host = JsonConvert.DeserializeObject<Host>(file);
+
+                return Json(host, JsonRequestBehavior.AllowGet);
+
+            } else
             {
-                new Host
-                {
-                    Adress = "192.168.1.130",
-                    Cpu_total = 12,
-                    Cpu_usage = 6,
-                    Memory_total = 6,
-                    Memory_usage = 2,
-                    Vms = vmlist
-                }
-            };
+                return Json("temp", JsonRequestBehavior.AllowGet);
+            }
 
-            return hostList;
+        }
+
+        public JsonResult GetClusterInfo()
+        {
+            //RunPowershell(@"-executionpolicy unrestricted -file C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\vApp.ps1 -vmhost " + vmhostname);
+
+            return Json("temp", JsonRequestBehavior.AllowGet);
+        }
+
+        public bool compareDates(string filePath)
+        {
+            FileInfo info = new FileInfo(filePath);
+            info.Refresh();
+            if (info.Exists)
+            {
+                DateTime systemTime = DateTime.Now;
+                double diffInSeconds = (systemTime - info.LastWriteTime).TotalSeconds;
+                if (diffInSeconds > 60)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            } else
+            {
+                return false;
+            }
         }
     }
 }
