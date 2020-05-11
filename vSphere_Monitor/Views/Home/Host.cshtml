@@ -181,10 +181,10 @@
                 //console.dir( xhr );
             })
         }
-        //automatic ajax call every 5 seconds
-        //setInterval(function () {
-        //    update();
-        //}, 5000);
+        //automatic ajax call every X seconds
+        setInterval(function () {
+            update();
+        }, 30000);
 
         $(document).ready(function () {
             update();

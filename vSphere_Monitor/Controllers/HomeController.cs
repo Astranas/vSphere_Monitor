@@ -19,6 +19,19 @@ namespace vSphere_Monitor.Controllers
             return View();
         }
 
+        public ActionResult About()
+        {
+            return View();
+        }
+        public ActionResult Cluster()
+        {
+            return View();
+        }
+        public ActionResult VM()
+        {
+            return View();
+        }
+
         public ActionResult Host(string id)
         {
             ViewBag.HostID = id;
@@ -71,7 +84,7 @@ namespace vSphere_Monitor.Controllers
 
                 string path = @"C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\" + vmhostfile + ".json";
 
-                if (compareDates(path))
+                if (CompareDates(path))
                 {
                     RunPowershell(@"-executionpolicy unrestricted -file C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\vApp.ps1 -vmhost " + vmhostname);
                 }
@@ -96,15 +109,16 @@ namespace vSphere_Monitor.Controllers
             return Json("temp", JsonRequestBehavior.AllowGet);
         }
 
-        public bool compareDates(string filePath)
+        public bool CompareDates(string filePath)
         {
+            int refreshRate = 200;
             FileInfo info = new FileInfo(filePath);
             info.Refresh();
             if (info.Exists)
             {
                 DateTime systemTime = DateTime.Now;
                 double diffInSeconds = (systemTime - info.LastWriteTime).TotalSeconds;
-                if (diffInSeconds > 60)
+                if (diffInSeconds > refreshRate)
                 {
                     return true;
                 }

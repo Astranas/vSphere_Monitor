@@ -5,27 +5,41 @@
 <div class="jumbotron">
     <h1>vSphere Monitor</h1>
     <p class="lead">Bienvenue dans vSphere Monitor. Sélectionnez un hôte ESXi dans le menu afin de commencer le monitoring.</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+    <p>@Html.ActionLink("À propos", "About", "Home", new { area = "" }, new { @class = "btn btn-primary btn-lg" })</p>
 </div>
 
 <div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
+    <div class="col-md-4 border border-dark rounded">
+        <h2>Cluster</h2>
+        <p>Récupérer et afficher les informations générales sur le cluster vSAN.</p>
+        <ul>
+            <li>Généralités</li>
+            <li>Hôtes du cluster</li>
+            <li>Espaces de stockage globaux</li>
+            <li>Schémas</li>
+        </ul>
+        <p class="text-right">@Html.ActionLink("Cluster", "Cluster", "Home", new { area = "" }, new { @class = "btn btn-default btn-dark" })</p>
     </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
+    <div class="col-md-4 border border-dark rounded">
+        <h2>Hôtes</h2>
+        <p>Récupérer et afficher les informations spécifique à un hôte ESXi du cluster.</p>
+        <ul>
+            <li>Consommation du CPU</li>
+            <li>Consommation de la RAM</li>
+            <li>Espaces de stockage locaux</li>
+            <li>Machines virtuelles associées</li>
+        </ul>
+        <p class="text-right">@Html.ActionLink("Hôtes", "Host", "Home", new { area = "" }, new { @class = "btn btn-default btn-dark" })</p>
     </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
+    <div class="col-md-4 border border-dark rounded">
+        <h2>VMs</h2>
+        <p>Récupérer et afficher les informations spécifiques aux machines virtuelles du cluster.</p>
+        <ul>
+            <li>Nom</li>
+            <li>Espace de stockage</li>
+            <li>RAM allouée</li>
+            <li>Santé vSAN</li>
+        </ul>
+        <p class="text-right">@Html.ActionLink("VMs", "VM", "Home", new { area = "" }, new { @class = "btn btn-default btn-dark" })</p>
     </div>
 </div>

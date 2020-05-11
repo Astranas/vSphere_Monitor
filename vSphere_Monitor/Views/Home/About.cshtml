@@ -1,0 +1,23 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "About";
+}
+
+<div class="jumbotron">
+    <h1>À propos</h1>
+    <p class="lead">vSphere Monitor par Nicolas Benitez.</p>
+    <p>@Html.ActionLink("Accueil", "Index", "Home", new { area = "" }, new { @class = "btn btn-primary btn-lg" })</p>
+</div>
+
+<div class="jumbotron pt-3 pb-3">
+    <div class="row">
+        <h2 class="text-center">Contact</h2>
+    </div>
+
+    <div class="row text-center">
+        <div class="col">
+            <p> Nom : Nicolas Benitez</p>
+            <p> Mail : nicolas.benitez@eduvaud.ch</p>
+        </div>
+    </div>
+</div>

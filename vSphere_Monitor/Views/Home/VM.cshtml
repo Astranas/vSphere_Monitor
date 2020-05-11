@@ -1,0 +1,10 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "VM";
+}
+
+<div class="jumbotron">
+    <h1>VMs</h1>
+    <p class="lead">Bienvenue dans vSphere Monitor. Sélectionnez un hôte ESXi dans le menu afin de commencer le monitoring.</p>
+    <p>@Html.ActionLink("À propos", "About", "Home", new { area = "" }, new { @class = "btn btn-primary btn-lg" })</p>
+</div>
