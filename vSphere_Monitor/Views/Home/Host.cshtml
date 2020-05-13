@@ -1,13 +1,9 @@
-﻿@{
-    ViewBag.Title = "Index";
-}
-
-<div class="jumbotron">
+﻿<div class="jumbotron">
     <h1 id="host"></h1>
 </div>
 
 <div class="row mb-5">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <h2 id="cputitle" class="text-center">Consommation CPU</h2>
         <div class="text-center">
             <p><span class="mr-5 ml-2" id="cpu_used"></span><span id="cpu_total"></span></p>
@@ -16,7 +12,7 @@
             <div id="cpu"></div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-6">
         <h2 id="ramtitle" class="text-center">Consommation RAM</h2>
         <div class="text-center">
             <p><span class="mr-5 ml-2" id="ram_used"></span><span id="ram_total"></span></p>
@@ -25,16 +21,41 @@
             <div id="ram"></div>
         </div>
     </div>
-    <div class="col-md-4">
-        <h2 id="storagetitle" class="text-center">Stockage</h2>
+    
+</div>
+<div class="row mb-5">
+    <div class="col">
+        <h2 id="localStoragetitle" class="text-center">Stockage local</h2>
         <div class="text-center">
-            <p><span class="mr-5 ml-2" id="storage_used"></span><span id="storage_total"></span></p>
+            <p><span class="mr-5 ml-2" id="local_storage_used"></span><span id="local_storage_total"></span></p>
         </div>
         <div class="rectangleEmpty m-auto">
-            <div id="storage"></div>
+            <div id="localStorage"></div>
         </div>
     </div>
 </div>
+
+<div class="row mb-5">
+    <div class="col-md-6">
+        <h2 id="vsanCacheStoragetitle" class="text-center">Stockage VSAN - Cache</h2>
+        <div class="text-center">
+            <p><span class="mr-5 ml-2" id="vsancache_storage_used"></span><span id="vsancache_storage_total"></span></p>
+        </div>
+        <div class="rectangleEmpty m-auto">
+            <div id="vsanCacheStorage"></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <h2 id="vsanCapacityStoragetitle" class="text-center">Stockage VSAN - Capacité</h2>
+        <div class="text-center">
+            <p><span class="mr-5 ml-2" id="vsancapacity_storage_used"></span><span id="vsancapacity_storage_total"></span></p>
+        </div>
+        <div class="rectangleEmpty m-auto">
+            <div id="vsanCapacityStorage"></div>
+        </div>
+    </div>
+</div>
+
 
 <div class="jumbotron pt-3 pb-3" id="vmContainer">
     <div class="row">
@@ -77,20 +98,17 @@
             // Code to run if the request succeeds (is done);
             // The response is passed to the function
             .done(function (data) {
-                console.log(data);
                 var host = data;
 
                 $('#host').html('ESXi - ' + host.Adress);
 
                 var percentage = 300;
+
                 var cpudivision = host.Cpu_usage / host.Cpu_total;
                 var cpuresult = cpudivision * percentage;
+
                 var ramdivision = host.Memory_usage / host.Memory_total;
                 var ramresult = ramdivision * percentage;
-
-                var storeused = (host.Storage_total - host.Storage_free);
-                var stordivision = storeused / host.Storage_total;
-                var storresult = stordivision * percentage;
 
                 $('#cpu').width(cpuresult);
                 $('#cpu_used').text('Utilisé : ' + host.Cpu_usage + ' [Mhz]');;
@@ -122,17 +140,58 @@
                     $('#ram').addClass('rectangleRed');
                 }
 
-                $('#storage').width(storresult);
-                $('#storage_used').text('Utilisé : ' + storeused + ' [Gb]');
-                $('#storage_total').text('Total : ' + host.Storage_total + ' [Gb]');
+                $.each(host.LocalDisks, function (k, v) {
 
-                if (stordivision * 100 <= 40) {
-                    $('#storage').addClass('rectangleGreen');
-                } else if (stordivision * 100 <= 70) {
-                    $('#storage').addClass('rectangleOrange');
-                } else {
-                    $('#storage').addClass('rectangleRed');
-                }
+                    var stordivision = v.CapacityRounded / v.FreeRounded;
+                    var storresult = stordivision * 10;
+                    var usedSpace = v.CapacityRounded - v.FreeRounded;
+
+                    $('#localStorage').width(storresult);
+
+                    $('#local_storage_used').text('Utilisé : ' + usedSpace + ' ' + unit);;
+                    $('#local_storage_total').text('Total : ' + v.CapacityRounded + ' ' + unit);
+
+                    if (stordivision <= 40) {
+                        $('#localStorage').addClass('rectangleGreen');
+                    } else if (stordivision <= 70) {
+                        $('#localStorage').addClass('rectangleOrange');
+                    } else {
+                        $('#localStorage').addClass('rectangleRed');
+                    }
+                });
+
+                $.each(host.VSANdisks, function (k, v) {
+                    var storUsed = (v.CapacityGB * v.UsedPercent) / 100;
+                    if (v.IsCacheDisk) {
+
+                        $('#vsanCacheStorage').width(v.UsedPercent);
+
+                        $('#vsancache_storage_used').text('Utilisé : ' + storUsed + ' ' + unit);;
+                        $('#vsancache_storage_total').text('Total : ' + v.CapacityGB + ' ' + unit);
+
+                        if (v.UsedPercent <= 40) {
+                            $('#vsanCacheStorage').addClass('rectangleGreen');
+                        } else if (v.UsedPercent <= 70) {
+                            $('#vsanCacheStorage').addClass('rectangleOrange');
+                        } else {
+                            $('#vsanCacheStorage').addClass('rectangleRed');
+                        }
+                    } else {
+
+                        $('#vsanCapacityStorage').width(v.UsedPercent);
+
+                        $('#vsancapacity_storage_used').text('Utilisé : ' + storUsed + ' ' + unit);;
+                        $('#vsancapacity_storage_total').text('Total : ' + v.CapacityGB + ' ' + unit);
+
+                        if (v.UsedPercent <= 40) {
+                            $('#vsanCapacityStorage').addClass('rectangleGreen');
+                        } else if (v.UsedPercent <= 70) {
+                            $('#vsanCapacityStorage').addClass('rectangleOrange');
+                        } else {
+                            $('#vsanCapacityStorage').addClass('rectangleRed');
+                        }
+                    }
+                });
 
                 var vmNumber = 0;
                 $.each(host.Vms, function (k, v) {
@@ -182,9 +241,9 @@
             })
         }
         //automatic ajax call every X seconds
-        setInterval(function () {
-            update();
-        }, 30000);
+        //setInterval(function () {
+        //    update();
+        //}, 30000);
 
         $(document).ready(function () {
             update();

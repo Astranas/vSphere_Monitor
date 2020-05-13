@@ -1,10 +1,118 @@
 ﻿@{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewBag.Title = "VM";
 }
 
 <div class="jumbotron">
-    <h1>VMs</h1>
-    <p class="lead">Bienvenue dans vSphere Monitor. Sélectionnez un hôte ESXi dans le menu afin de commencer le monitoring.</p>
-    <p>@Html.ActionLink("À propos", "About", "Home", new { area = "" }, new { @class = "btn btn-primary btn-lg" })</p>
+    <h1>VM</h1>
+    <p class="lead">Bienvenue dans le monitoring des machines virtuelles.</p>
 </div>
+
+<div class="jumbotron pt-3 pb-3" id="vmContainer">
+    <div class="row">
+        <h2 class="text-center">Machines virtuelles</h2>
+    </div>
+
+    <div class="row text-center">
+        <div class="col border border-dark rounded" id="0">
+            <p id="vmName"> Nom : </p>
+            <p id="vmHost"> Hôte : </p>
+            <p id="vmCreateDate"> Date de création : </p>
+            <p id="vmCpu"> Nombre de CPU : </p>
+            <p id="vmMemory"> Mémoire : </p>
+            <p id="vmVSANHealth"> Santé vSAN : </p>
+            <p id="vmState">État : </p>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        function update() {
+            // Using the core $.ajax() method
+            $.ajax({
+
+                // The URL for the request
+                url: '@Url.Action("GetVMInfo", "Home")',
+
+                // The data to send (will be converted to a query string)
+                // format = name of value : value
+                data: {
+                },
+
+                // Whether this is a POST or GET request
+                type: "POST",
+
+                // The type of data we expect back
+                dataType: "json",
+            })
+            // Code to run if the request succeeds (is done);
+            // The response is passed to the function
+                .done(function (data) {
+                    console.log("done");
+                    var vmNumber = 0;
+                    $.each(data, function (k, v) {
+
+                        var vm = v;
+
+                        var unit = '';
+                        if (vm.Memory < 1) {
+                            unit = '[Mb]';
+                            vm.Memory = vm.Memory * 1000;
+                        } else {
+                            unit = '[Gb]';
+                        }
+
+                        var state = '';
+                        if (vm.State == 0) {
+                            state = 'OFF';
+                        } else {
+                            state = 'ON'
+                        }
+
+                        if ($('#' + vmNumber).length > 0) {
+                            if ($('#' + vmNumber).attr('id') == vmNumber) {
+                                $('#' + vmNumber + ' > p#vmName').text('Nom : ' + vm.Name);
+                                $('#' + vmNumber + ' > p#vmHost').text('Hôte : ' + vm.Host);
+                                $('#' + vmNumber + ' > p#vmCreateDate').text('Date de création : ' + vm.CreateDate);
+                                $('#' + vmNumber + ' > p#vmCpu').text('Nombre de CPU : ' + vm.Cpu_number);
+                                $('#' + vmNumber + ' > p#vmMemory').text('Mémoire allouée : ' + vm.Memory + unit);
+                                $('#' + vmNumber + ' > p#vmVSANHealth').text('Santé VSAN : ' + vm.VsanHealth);
+                                $('#' + vmNumber + ' > p#vmState').text('État : [' + state + "]");
+                            }
+
+                        } else {
+                            if ((vmNumber % 2) != 0 && vmNumber > 1) {
+                                $('#vmContainer').append('<div class="row text-center"><div class="col border border-dark rounded" id="' + vmNumber + '"><p id = "vmName" > Nom : ' + vm.Name + '</p><p id="vmHost"> Hôte : ' + vm.Host + '</p><p id="vmCreateDate"> Date de création : ' + vm.CreateDate + '</p><p id="vmCpu">Nombre de CPU : ' + vm.Cpu_number + '</p><p id="vmMemory">Mémoire allouée : ' + vm.Memory + unit + '</p><p id="vmVSANHealth">Santé VSAN : ' + vm.VsanHealth + '</p><p id="vmState">État : [' + state + ']</p></div></div>');
+
+                            } else {
+                                $('#vmContainer > div.row').last().append('<div class="col border border-dark rounded" id="' + vmNumber + '"><p id = "vmName" > Nom : ' + vm.Name + '</p><p id="vmHost"> Hôte : ' + vm.Host + '</p><p id="vmCreateDate"> Date de création : ' + vm.CreateDate + '</p><p id="vmCpu">Nombre de CPU : ' + vm.Cpu_number + '</p><p id="vmMemory">Mémoire allouée : ' + vm.Memory + unit + '</p><p id="vmVSANHealth">Santé VSAN : ' + vm.VsanHealth + '</p><p id="vmState">État : [' + state + ']</p></div>');
+                            }
+                        }
+
+                        if (vm.VsanHealth == "healthy") {
+                            $('#' + vmNumber + ' > p#vmVSANHealth').css("color", "green");
+                        } else {
+                            $('#' + vmNumber + ' > p#vmVSANHealth').css("color", "red");
+                        }
+                        vmNumber++;
+                    });
+                })
+            // Code to run if the request fails; the raw request and
+            // status codes are passed to the function
+            .fail(function( xhr, status, errorThrown ) {
+                //alert( "Sorry, there was a problem!" );
+                //console.log( "Error: " + errorThrown );
+                //console.log( "Status: " + status );
+                //console.dir( xhr );
+            })
+        }
+        //automatic ajax call every X seconds
+        //setInterval(function () {
+        //    update();
+        //}, 30000);
+
+        $(document).ready(function () {
+            update();
+        })
+    </script>
+}

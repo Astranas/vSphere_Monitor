@@ -1,10 +1,144 @@
-﻿@{
+﻿@model vSphere_Monitor.Models.Image
+
+@{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewBag.Title = "Cluster";
 }
 
 <div class="jumbotron">
     <h1>Cluster</h1>
-    <p class="lead">Bienvenue dans vSphere Monitor. Sélectionnez un hôte ESXi dans le menu afin de commencer le monitoring.</p>
-    <p>@Html.ActionLink("À propos", "About", "Home", new { area = "" }, new { @class = "btn btn-primary btn-lg" })</p>
+    <p class="lead">Bienvenue dans le monitoring du Cluster</p>
 </div>
+
+<div class="row mb-5">
+    <div class="col-md-4">
+        <h2 id="cputitle" class="text-center">DRS</h2>
+        <p class="text-center" id="drsState"></p>
+    </div>
+    <div class="col-md-4">
+        <h2 id="ramtitle" class="text-center">HA</h2>
+        <p class="text-center" id="haState"></p>
+    </div>
+    <div class="col-md-4">
+        <h2 id="storagetitle" class="text-center">VSAN</h2>
+        <p class="text-center" id="vsanState"></p>
+    </div>
+</div>
+
+<div class="jumbotron pt-3 pb-3" id="hostContainer">
+    <div class="row">
+        <h2 class="text-center">Hôtes ESXI</h2>
+    </div>
+
+    <div class="row text-center">
+        <div class="col border border-dark rounded" id="0">
+            <p id="hostAdress"> Adresse : </p>
+            <p id="hostVersion"> Version : </p>
+            <p id="hostBuild"> Build : </p>
+            <p id="hostAPI"> Version API : </p>
+            <p id="hostState">État : </p>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col">
+        <img src="@Url.Content(Model.ImagePath)" alt="Image" />
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        function update() {
+            // Using the core $.ajax() method
+            $.ajax({
+
+                // The URL for the request
+                url: '@Url.Action("GetClusterInfo", "Home")',
+
+                // Whether this is a POST or GET request
+                type: "POST",
+
+                // The type of data we expect back
+                dataType: "json",
+            })
+            // Code to run if the request succeeds (is done);
+            // The response is passed to the function
+            .done(function (data) {
+                console.log(data);
+                var title = $(".lead").html();
+                $(".lead").html(title + " " + data.Name + ".");
+
+                if (data.DrsEnabled) {
+                    $("#drsState").html("Activé");
+                    $("#drsState").css("color", "green");
+
+                } else {
+                    $("#drsState").html("Désactivé");
+                    $("#drsState").css("color", "red");
+                }
+                if (data.HAEnabled) {
+                    $("#haState").html("Activé");
+                    $("#haState").css("color", "green");
+                } else {
+                    $("#haState").html("Désactivé");
+                    $("#haState").css("color", "red");
+                }
+                if (data.VsanEnabled) {
+                    $("#vsanState").html("Activé");
+                    $("#vsanState").css("color", "green");
+                } else {
+                    $("#vsanState").html("Désactivé");
+                    $("#vsanState").css("color", "red");
+                }
+
+                var hostNumber = 0;
+                $.each(data.Hosts, function (k, v) {
+                    var host = $(this)[0];
+                    var state = '';
+                    if (host.State == 0) {
+                        state = 'OFF';
+                    } else {
+                        state = 'ON'
+                    }
+
+                    if ($('#' + hostNumber).length > 0) {
+                        if ($('#' + hostNumber).attr('id') == hostNumber) {
+                            $('#' + hostNumber + ' > p#hostAdress').text('Nom : ' + host.Adress);
+                            $('#' + hostNumber + ' > p#hostVersion').text('Version : ' + host.Version);
+                            $('#' + hostNumber + ' > p#hostBuild').text('Build : ' + host.Build);
+                            $('#' + hostNumber + ' > p#hostAPI').text('Version API : ' + host.ApiVersion);
+                            $('#' + hostNumber + ' > p#hostState').text('État : [' + state + ']');
+
+                        }
+
+                    } else {
+                        if ((hostNumber % 2) != 0 && hostNumber > 1) {
+                            $('#hostContainer').append('<div class="row text-center"><div class="col border border-dark rounded" id="' + hostNumber + '"><p id = "hostAdress" > Nom : ' + host.Adress + '</p><p id="hostVersion"> Version : ' + host.Version + '</p><p id="hostBuild"> Build : ' + host.Build + '</p><p id="hostAPI">Version API : ' + host.ApiVersion + '</p><p id="hostState">État : [' + state + ']</p></div></div>');
+
+                        } else {
+                            $('#hostContainer > div.row').last().append('<div class="col border border-dark rounded" id="' + hostNumber + '"><p id = "hostAdress" > Adresse : ' + host.Adress + '</p><p id="hostVersion"> Version : ' + host.Version + '</p><p id="hostBuild"> Build : ' + host.Build + '</p><p id="hostAPI">Version API : ' + host.ApiVersion + '</p><p id="hostState">État : [' + state + ']</p></div>');
+
+                        }
+                    }
+                    hostNumber++;
+                });
+            })
+            // Code to run if the request fails; the raw request and
+            // status codes are passed to the function
+            .fail(function( xhr, status, errorThrown ) {
+                //alert( "Sorry, there was a problem!" );
+                //console.log( "Error: " + errorThrown );
+                //console.log( "Status: " + status );
+                //console.dir( xhr );
+            })
+        }
+        //automatic ajax call every X seconds
+        //setInterval(function () {
+        //    update();
+        //}, 30000);
+
+        $(document).ready(function () {
+            update();
+        })
+    </script>
+}

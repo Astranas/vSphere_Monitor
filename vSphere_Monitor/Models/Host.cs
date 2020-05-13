@@ -14,6 +14,10 @@ namespace vSphere_Monitor.Models
         private double cpu_total;
         private double storage_free;
         private double storage_total;
+        private int state;
+        private string version;
+        private int build;
+        private string apiVersion;
         private List<VM> vms;
         private List<Disk> localDisks;
         private List<Disk> vSANdisks;
@@ -30,8 +34,12 @@ namespace vSphere_Monitor.Models
         public double Cpu_total { get => cpu_total; set => cpu_total = value; }
         public double Storage_free { get => storage_free; set => storage_free = value; }
         public double Storage_total { get => storage_total; set => storage_total = value; }
+        public int State { get => state; set => state = value; }
+        public string Version { get => version; set => version = value; }
+        public int Build { get => build; set => build = value; }
+        public string ApiVersion { get => apiVersion; set => apiVersion = value; }
         public List<VM> Vms { get => vms; set => vms = value; }
         public List<Disk> LocalDisks { get => localDisks; set => localDisks = value; }
-        public List<Disk> VSANDisks { get => vSANdisks; set => vSANdisks = value; }
+        public List<Disk> VSANdisks { get => vSANdisks; set => vSANdisks = value; }
     }
 }

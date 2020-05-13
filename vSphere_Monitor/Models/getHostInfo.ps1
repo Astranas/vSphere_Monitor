@@ -106,15 +106,12 @@ if($vmhost -ne "" -and $vmhost -notlike $null)
     #boucle sur les vms pour créer des objets JSON de vms
     foreach($vm in $vms)
     {
-        $vsanHealth = (Get-VsanObject -VM $vm.Name | Where-Object {$_.Type -eq 'VDisk'} | Select VsanHealth).VsanHealth
 
         $vmInfo = @{
         "Name" = $vm.Name;
         "Cpu_number" = $vm.NumCpu;
         "Memory" = $vm.MemoryGB;
         "State" = $vm.PowerState;
-        "Host" = $esxiHost.Name;
-        "VsanHealth" = $vsanHealth;
         }
         #ajout de l'objet JSON au tableau
         $vmlist.Add($vmInfo) 

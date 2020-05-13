@@ -25,7 +25,8 @@ namespace vSphere_Monitor.Controllers
         }
         public ActionResult Cluster()
         {
-            return View();
+            Image img = new Image();
+            return View(img);
         }
         public ActionResult VM()
         {
@@ -86,7 +87,7 @@ namespace vSphere_Monitor.Controllers
 
                 if (CompareDates(path))
                 {
-                    RunPowershell(@"-executionpolicy unrestricted -file C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\vApp.ps1 -vmhost " + vmhostname);
+                    RunPowershell(@"-executionpolicy unrestricted -file C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\getHostInfo.ps1 -vmhost " + vmhostname);
                 }
 
                 string file = System.IO.File.ReadAllText(@"C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\" + vmhostfile + ".json");
@@ -104,9 +105,31 @@ namespace vSphere_Monitor.Controllers
 
         public JsonResult GetClusterInfo()
         {
-            //RunPowershell(@"-executionpolicy unrestricted -file C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\vApp.ps1 -vmhost " + vmhostname);
+            string path = @"C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\Clu-lab01.json";
 
-            return Json("temp", JsonRequestBehavior.AllowGet);
+            if (CompareDates(path))
+            {
+                RunPowershell(@"-executionpolicy unrestricted -file C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\getClusterInfo.ps1");
+            }
+            string file = System.IO.File.ReadAllText(@"C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\Clu-lab01.json");
+
+            Cluster clu = JsonConvert.DeserializeObject<Cluster>(file);
+
+            return Json(clu, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetVmInfo()
+        {
+            string path = @"C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\VMs.json";
+
+            if (CompareDates(path))
+            {
+                RunPowershell(@"-executionpolicy unrestricted -file C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\getVMInfo.ps1");
+            }
+            string file = System.IO.File.ReadAllText(@"C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\VMs.json");
+            List<VM> vmlist = JsonConvert.DeserializeObject<List<VM>>(file);
+
+            return Json(vmlist, JsonRequestBehavior.AllowGet);
         }
 
         public bool CompareDates(string filePath)
