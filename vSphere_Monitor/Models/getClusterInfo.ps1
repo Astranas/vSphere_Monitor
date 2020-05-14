@@ -1,11 +1,11 @@
 ﻿#variables générales
-$vCenter_Adress = '192.168.1.171'
-$account = 'monitor@vsphere.local'
-$password = '.Etml-44'
+$vCenter_Adress = '' #définir l'adresse IP ou nom FQDN du serveur VCSA selon la présente d'un serveur DNS sur le réseau
+$account = '' #définir le nom de compte qui doit se connecter au serveur ci-dessus
+$password = '' #définir le mot de passe du compte qui doit se connecter
 
-$datacenterName = 'Datacenter'
-$clusterName = 'Clu-lab01'
-$resultFilePath = "C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\$clusterName.json"
+$datacenterName = '' #définir le nom du Datacenter de l'infrastructure
+$clusterName = '' #définir le nom du cluster de l'infrastructure
+$resultFilePath = "" #définir le chemin du fichier JSON de résultat final
 
 <#
 .NOTES
