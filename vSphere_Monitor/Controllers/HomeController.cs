@@ -3,10 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Management.Automation;
-using System.Management.Automation.Runspaces;
-using System.Web;
 using System.Web.Mvc;
 using vSphere_Monitor.Models;
 
@@ -39,6 +35,10 @@ namespace vSphere_Monitor.Controllers
             return View();
         }
 
+        /// <summary>
+        /// Runs a .NET ProcessStartInfo to launch a Powershell Script
+        /// </summary>
+        /// <param name="args">list of arguments to give to the Powershell instance including location of the script</param>
         public void RunPowershell(string args)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo();
@@ -56,7 +56,12 @@ namespace vSphere_Monitor.Controllers
             // Read the standard error of net.exe and write it on to console.
             Debug.WriteLine(myStreamReader.ReadLine());
         }
-        
+
+        /// <summary>
+        /// Retrieves specific VMGuest info
+        /// </summary>
+        /// <param name="hostId">ID of the expected VMGuest to target</param>
+        /// <returns>JSON formated data to view</returns>
         public JsonResult GetHostInfo(string hostId)
         {
             if (hostId != "" && hostId != null)
@@ -66,31 +71,31 @@ namespace vSphere_Monitor.Controllers
                 switch (hostId)
                 {
                     case "1":
-                        vmhostname = "192.168.1.168";
-                        vmhostfile = "192-168-1-168";
+                        vmhostname = ""; //Adapt to VMGuest name or IP adress
+                        vmhostfile = ""; //Adapt to script output file
                         break;
                     case "2":
-                        vmhostname = "192.168.1.169";
-                        vmhostfile = "192-168-1-169";
+                        vmhostname = ""; //Adapt to VMGuest name or IP adress
+                        vmhostfile = ""; //Adapt to script output file
                         break;
                     case "3":
-                        vmhostname = "192.168.1.174";
-                        vmhostfile = "192-168-1-174";
+                        vmhostname = ""; //Adapt to VMGuest name or IP adress
+                        vmhostfile = ""; //Adapt to script output file
                         break;
                     case "4":
-                        vmhostname = "192.168.1.175";
-                        vmhostfile = "192-168-1-175";
+                        vmhostname = ""; //Adapt to VMGuest name or IP adress
+                        vmhostfile = ""; //Adapt to script output file
                         break;
                 }
 
-                string path = @"C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\" + vmhostfile + ".json";
+                string path = @""; //Adapt to script output file location
 
                 if (CompareDates(path))
                 {
-                    RunPowershell(@"-executionpolicy unrestricted -file C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\getHostInfo.ps1 -vmhost " + vmhostname);
+                    RunPowershell(@""); //Adapt to script file location and optionnal parameters given to script
                 }
 
-                string file = System.IO.File.ReadAllText(@"C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\" + vmhostfile + ".json");
+                string file = System.IO.File.ReadAllText(@""); //Adapt to script output file location
 
                 Host host = JsonConvert.DeserializeObject<Host>(file);
 
@@ -103,44 +108,61 @@ namespace vSphere_Monitor.Controllers
 
         }
 
+        /// <summary>
+        /// Retrieves all cluster info
+        /// </summary>
+        /// <returns>JSON formated data to view</returns>
         public JsonResult GetClusterInfo()
         {
-            string path = @"C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\Clu-lab01.json";
+            string path = @""; //Adapt to script output file location
 
             if (CompareDates(path))
             {
-                RunPowershell(@"-executionpolicy unrestricted -file C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\getClusterInfo.ps1");
+                RunPowershell(@""); //Adapt to script file location and optionnal parameters given to script
             }
-            string file = System.IO.File.ReadAllText(@"C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\Clu-lab01.json");
+            string file = System.IO.File.ReadAllText(@""); //Adapt to script output file location
 
             Cluster clu = JsonConvert.DeserializeObject<Cluster>(file);
 
             return Json(clu, JsonRequestBehavior.AllowGet);
         }
 
+        /// <summary>
+        /// Retrieves all virtual machines info
+        /// </summary>
+        /// <returns>JSON formated data to view</returns>
         public JsonResult GetVmInfo()
         {
-            string path = @"C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\VMs.json";
+            string path = @""; //Adapt to script output file location
 
             if (CompareDates(path))
             {
-                RunPowershell(@"-executionpolicy unrestricted -file C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\getVMInfo.ps1");
+                RunPowershell(@""); //Adapt to script file location and optionnal parameters given to script
             }
-            string file = System.IO.File.ReadAllText(@"C:\Users\User\source\repos\vSphere_Monitor\vSphere_Monitor\Models\VMs.json");
+            string file = System.IO.File.ReadAllText(@""); //Adapt to script output file location
             List<VM> vmlist = JsonConvert.DeserializeObject<List<VM>>(file);
 
             return Json(vmlist, JsonRequestBehavior.AllowGet);
         }
 
+        /// <summary>
+        /// Compares the creation date of a file to the system time
+        /// </summary>
+        /// <param name="filePath">The location of the file on the system to get the creation time</param>
+        /// <returns>true if the difference between the system time and file creation time exceeds a selected threshold</returns>
         public bool CompareDates(string filePath)
         {
+            //time in seconds that define the threshold
             int refreshRate = 200;
+
             FileInfo info = new FileInfo(filePath);
             info.Refresh();
+
             if (info.Exists)
             {
                 DateTime systemTime = DateTime.Now;
                 double diffInSeconds = (systemTime - info.LastWriteTime).TotalSeconds;
+
                 if (diffInSeconds > refreshRate)
                 {
                     return true;

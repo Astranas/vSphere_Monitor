@@ -218,7 +218,6 @@
                             $('#' + vmNumber + ' > p#vmState').text('État : [' + state + ']');
 
                         }
-
                     } else {
                         if ((vmNumber % 2) != 0 && vmNumber > 1) {
                             $('#vmContainer').append('<div class="row text-center"><div class="col" id="' + vmNumber + '"><p id = "vmName" > Nom : ' + vm.Name + '</p><p id="vmCpu"> Nombre de CPU : ' + vm.Cpu_number + '</p><p id="vmMemory"> Mémoire : ' + + vm.Memory + ' ' + unit + '</p><p id="vmState">État : [' + state + ']</p></div></div>');
